@@ -40,7 +40,7 @@ A market research agency wanted to validate responses coming in against a set of
 
 Solution/Approach:
 ```md
-    - Create a relational database with the business rules. (To reduce the overhead of maintaining the rules in the code.)
+    - Create a relational database with the rules. (To reduce the overhead of maintaining the rules in the code.)
     - Util function to validate incoming data against the business rules.
 ```
 
@@ -73,60 +73,27 @@ Validation example:
 - Employee email cannot be duplicate and must be valid.
 - Employee phone number cannot be duplicate and must be 10 digits.
 
-Validation util function:
-```js
-const validateData = (req, res, next) => {
-    const { name, age, salary, savings, email, phone } = req.body;
-    const errors = [];
+These all will be checked by CONSTRAINT's in the database.
 
-    if (age < 18) {
-        errors.push('Age cannot be less than 18.');
-    }
-
-    if (salary < 10000) {
-        errors.push('Salary cannot be less than 10000.');
-    }
-
-    if (savings > salary) {
-        errors.push('Savings cannot be more than salary.');
-    }
-
-    if (email) {
-        const validEmail = String(email).match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
-            ? next()
-            : res.status(400).json({ message: 'Email is not valid.' });
-        
-        // Check if email is duplicate
-        const duplicateEmail = db.get('employee').find({ email
-        }).value();
-
-        if (duplicateEmail) {
-            errors.push('Email is duplicate.');
-        }
-    }
-
-    if (phone) {
-        if(String(phone).length !== 10) {
-            errors.push('Phone number must be 10 digits.');
-        }
-        const duplicatePhone = db.get('employee').find({ phone
-        }).value();
-        if (duplicatePhone) {
-            errors.push('Phone number is duplicate.');
-        }
-    }
-
-    if (errors.length) {
-        return res.status(400).json({ errors });
-    }
-
-    next();
-};
+```SQL
+CREATE TABLE IF NOT EXISTS employee (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    age INTEGER NOT NULL,
+    salary INTEGER NOT NULL,
+    savings INTEGER NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT NOT NULL UNIQUE,
+    CONSTRAINT age_check CHECK (age > 18),
+    CONSTRAINT salary_check CHECK (salary > 10000),
+    CONSTRAINT savings_check CHECK (savings > salary)
+);
 ```
 
 3. Data export
 
-Each response to the form becomes a row in the sheet, and questions in the form become columns.
+A very common need for organizations is wanting all their data onto Google Sheets, wherein they could connect their CRM, and also generate graphs and charts offered by Sheets out of the box. In such cases, each response to the form becomes a row in the sheet, and questions in the form become columns. 
+
 
 Solution/Approach:
 ```md
@@ -161,49 +128,32 @@ For this example, we will use the above employee database.
 ```
 
 ```js
-// API endpoint to export data as JSON
-app.get('/export', (req, res) => {
-    db.all('SELECT * FROM employee', (err, rows) => {
-        if (err) {
-            return res.status(500).json({ message: 'Something went wrong.' });
-        }
-        return res.status(200).json(rows);
-    });
-});
-
 // API endpoint to export data as CSV
-app.get('/export/csv', (req, res) => {
-    db.all('SELECT * FROM employee', (err, rows) => {
+app.get("/", (_req, res) => {
+    const sql = `SELECT * FROM employee`;
+    const params = [];
+
+    db.all(sql, params, (err, rows) => {
         if (err) {
-            return res.status(500).json({ message: 'Something went wrong.' });
+            res.status(400).json({ error: err.message });
+            return;
         }
-        const csv = convertToCSV(rows);
-        downloadCSV(csv, 'employee.csv');
-        return res.status(200).json({ message: 'CSV downloaded successfully.' });
+        const header = "id,full_name,age,salary,savings,email,phone";
+        var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
+        csv = header + "\n" + csv;
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=employee.csv");
+        res.send(csv);
     });
 });
+```
 
-// function to convert JSON to CSV
-const convertToCSV = (objArray) => {
-    const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
-    let str = `${Object.keys(array[0]).map((value) => `"${value}"`).join(',')}\r\n`;
-
-    return array.reduce((str, next) => {
-        str += `${Object.values(next).map((value) => `"${value}"`).join(',')}\r\n`;
-        return str;
-    }, str);
-};
-
-// function to download CSV
-const downloadCSV = (csv, filename) => {
-    const csvFile = new Blob([csv], { type: 'text/csv' });
-    const downloadLink = document.createElement('a');
-    downloadLink.download = filename;
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = 'none';
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-};
+Output: 
+```csv
+id,full_name,age,salary,savings,email,phone
+1,Akash,19,30000,10000,akash@gmail.com,9876543210
+2,Akash,19,30000,10000,akash1@gmail.com,9876543211
+3,Jane,21,32000,10000,Jane@gmail.com,1782361231
 ```
 
 4. A recent client partner wanted us to send an SMS to the customer whose details are collected in the response as soon as the ingestion was complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This customer was supposed to use this as a “receipt” for them having participated in the exercise.

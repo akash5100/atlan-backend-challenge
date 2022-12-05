@@ -1,5 +1,6 @@
 /*
- * This file contains utility functions
+ * After CONSTRAINTS are defined, do we need to validate the data?
+    For the phone number, yes.
  */
 
 const validateData = (salary, savings, age, phone) => {

@@ -22,7 +22,10 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
                 salary INTEGER NOT NULL,
                 savings INTEGER NOT NULL,
                 email TEXT NOT NULL UNIQUE,
-                phone TEXT NOT NULL UNIQUE
+                phone TEXT NOT NULL UNIQUE,
+                CONSTRAINT age_check CHECK (age > 18),
+                CONSTRAINT salary_check CHECK (salary > 10000),
+                CONSTRAINT savings_check CHECK (savings > salary)
               )`),
                 (err) => {
                     if (err) {
@@ -37,7 +40,3 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
 });
 
 export default db;
-
-/*
-    Due to SQL query, we only need to validate salary, savings, and age. Thus, we remove the validation for email and phone.
-*/
