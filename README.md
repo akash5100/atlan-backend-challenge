@@ -13,7 +13,6 @@
 4. `/employee/update/:id` - Update employee by id in the database.
 5. `/employee/delete/:id` - Delete employee by id from the database.
 6. `/employee/export` - Export all employees from the database as CSV.
-7. `/sms` - Adds a new SMS to the message queue.
 
 # What we want to achieve
 
@@ -202,19 +201,17 @@ After inserting the employee, we get:
 We will send the SMS to the employee's phone number using the Twilio API and to make it failsafe, we will use a message queue to store the SMS and then process them asynchronously.
 
 ```js
-// API endpoint to push the SMS to the message queue
-app.post("/sms", (req, res) => {
-
-    const  { phone } = req.body;
-
-    const message = `Hi ${full_name}, welcome to the club!`;
-
-    queue.push({ message, phone });
-    res.json({ message: "success" });
-});
+/*
+- When we add an employee, we add name, phone number to a table called queue.
+- The nodejs server will convert the table to a queue and then process the queue asynchronously.
+- The queue will be processed every 5 seconds.
+- If the SMS is sent successfully, it will be removed from the queue.
+- If the SMS is not sent successfully, it will retry after 5 seconds.
+*/
 
 // Helper function to send the SMS with Twilio
 const sendSMS = (message, phone) => {
+    // Dummy from documentaion
     client.messages
         .create({
             body: message,
@@ -226,15 +223,47 @@ const sendSMS = (message, phone) => {
 
 // Process the SMS in the queue, once the queue is empty, it will wait for 5 seconds and then check again.
 const processSMS = () => {
-    if (queue.length > 0) {
-        const { message, phone } = queue.shift();
-        var error = sendSMS(message, phone);
+    // Fill the messageQueue with data from the database
+    fillQueue();
+    // Process the message queue
+    if (messageQueue.length > 0) {
+        const { name, phone } = messageQueue.shift();
+        var error = sendSMS(name, phone);
         if (error) {
-            queue.push({ message, phone });
+            messageQueue.push({ name, phone });
+        } else {
+            removeMessageFromQueue(name, phone); // Remove the message from the queue table
         }
     }
     setTimeout(processSMS, 5000);
 };
+
+const fillQueue = () => {
+    // Fill the global queue with the data from the database
+    // Format: {name, phone}
+    const sql = `SELECT name, phone FROM queue`;
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            throw err;
+        }
+        rows.forEach((row) => {
+            messageQueue.push(row);
+        });
+    });
+};
+
+const removeMessageFromQueue = (name, phone) => {
+    const sql = `DELETE FROM queue WHERE name = ? AND phone = ?`;
+    const params = [name, phone];
+
+    db.run(sql, params, function (err, _result) {
+        if (err) {
+            console.log(err.message);
+        }
+    });
+};
+
+// Did we just implement a message queue? Yes, we did.
 ```
 
 # Additional requirements
@@ -251,6 +280,12 @@ Eventual consistency is what the clients expect as an outcome of this feature, m
 
 Design a sample schematic for how you would store forms (with questions) and responses (with answers) in the Collect data store. Forms, Questions, Responses and Answers each will have relevant metadata
 
+Tables:
+- form
+- question
+- response
+- answer
+
 ```SQL
 CREATE TABLE form (
     id INTEGER PRIMARY KEY,
@@ -259,3 +294,38 @@ CREATE TABLE form (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
+```
+
+```SQL
+CREATE TABLE question (
+    id INTEGER PRIMARY KEY,
+    form_id INTEGER NOT NULL,
+    question TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (form_id) REFERENCES form (id)
+);
+```
+
+```SQL
+CREATE TABLE response (
+    id INTEGER PRIMARY KEY,
+    form_id INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (form_id) REFERENCES form (id)
+);
+```
+
+```SQL
+CREATE TABLE answer (
+    id INTEGER PRIMARY KEY,
+    response_id INTEGER NOT NULL,
+    question_id INTEGER NOT NULL,
+    answer TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (response_id) REFERENCES response (id),
+    FOREIGN KEY (question_id) REFERENCES question (id)
+);
+```
