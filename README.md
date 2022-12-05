@@ -44,27 +44,34 @@ Solution/Approach:
     - Util function to validate incoming data against the business rules.
 ```
 
-For this example, I choose SQLite because it is a relational database and serverless. (I dont want to maintain a server for this example. Additionally, we can use AWS Lambda for testing.)
+For this example, I choose SQLite3 because it is a relational database and serverless. (I dont want to maintain a server for this example. Additionally, later we can use AWS Lambda for testing.)
 
-Create employee SQLite database;
+Create employee SQLite database
 ```SQL
 CREATE TABLE employee (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     age INTEGER NOT NULL,
-    salary INTEGER NOT NULL
-    savings INTEGER NOT NULL
-    email TEXT NOT NULL
-    phone TEXT NOT NULL
+    salary INTEGER NOT NULL,
+    savings INTEGER NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT NOT NULL UNIQUE,
 );
 ```
+
+This will create a table like:
+| id | name | age | salary | savings | email | phone |
+|----|------|-----|--------|---------|-------|-------|
+| 1  | John | 25  | 50000  | 10000   | john@gmail.com | 1234567890 |
+| 2  | Jane | 30  | 100000 | 50000   | jane@gmail.com | 1234567891 |
+
 
 Validation example:
 - Employee age cannot be less than 18.
 - Employee salary cannot be less than 10000.
 - Employee savings cannot be more than salary.
 - Employee email cannot be duplicate and must be valid.
-- Employee phone must be 10 digits.
+- Employee phone number cannot be duplicate and must be 10 digits.
 
 Validation util function:
 ```js
@@ -99,9 +106,14 @@ const validateData = (req, res, next) => {
     }
 
     if (phone) {
-        return String(phone).length === 10
-            ? next()
-            : res.status(400).json({ message: 'Phone number must be 10 digits.' });
+        if(String(phone).length !== 10) {
+            errors.push('Phone number must be 10 digits.');
+        }
+        const duplicatePhone = db.get('employee').find({ phone
+        }).value();
+        if (duplicatePhone) {
+            errors.push('Phone number is duplicate.');
+        }
     }
 
     if (errors.length) {
@@ -124,7 +136,7 @@ Solution/Approach:
 
 For this example, we will use the above employee database.
 
-JSON res
+`json` response from the endpoint be like:
 ```JSON
 [
     {
@@ -149,11 +161,49 @@ JSON res
 ```
 
 ```js
-// API endpoint to export data
+// API endpoint to export data as JSON
+app.get('/export', (req, res) => {
+    db.all('SELECT * FROM employee', (err, rows) => {
+        if (err) {
+            return res.status(500).json({ message: 'Something went wrong.' });
+        }
+        return res.status(200).json(rows);
+    });
+});
+
+// API endpoint to export data as CSV
+app.get('/export/csv', (req, res) => {
+    db.all('SELECT * FROM employee', (err, rows) => {
+        if (err) {
+            return res.status(500).json({ message: 'Something went wrong.' });
+        }
+        const csv = convertToCSV(rows);
+        downloadCSV(csv, 'employee.csv');
+        return res.status(200).json({ message: 'CSV downloaded successfully.' });
+    });
+});
 
 // function to convert JSON to CSV
+const convertToCSV = (objArray) => {
+    const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
+    let str = `${Object.keys(array[0]).map((value) => `"${value}"`).join(',')}\r\n`;
+
+    return array.reduce((str, next) => {
+        str += `${Object.values(next).map((value) => `"${value}"`).join(',')}\r\n`;
+        return str;
+    }, str);
+};
 
 // function to download CSV
+const downloadCSV = (csv, filename) => {
+    const csvFile = new Blob([csv], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+};
 ```
 
 4. A recent client partner wanted us to send an SMS to the customer whose details are collected in the response as soon as the ingestion was complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This customer was supposed to use this as a “receipt” for them having participated in the exercise.
