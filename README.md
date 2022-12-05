@@ -1,3 +1,20 @@
+# How to run this project
+
+1. Clone this repository.
+2. Install the dependencies using `npm install`.
+3. Run the server using `nodemon server.js`.
+4. Open the browser and go to `http://localhost:3000/`.
+
+# Implemented Endpoints
+
+1. `/employee/add` - Add employee to the database.
+2. `/employee/get` - Get all employees from the database.
+3. `/employee/get/:id` - Get employee by id from the database.
+4. `/employee/update/:id` - Update employee by id in the database.
+5. `/employee/delete/:id` - Delete employee by id from the database.
+6. `/employee/export` - Export all employees from the database as CSV.
+7. `/sms` - Adds a new SMS to the message queue.
+
 # What we want to achieve
 
 1. Full Text Search
@@ -44,7 +61,7 @@ Solution/Approach:
     - Util function to validate incoming data against the business rules.
 ```
 
-For this example, I choose SQLite3 because it is a relational database and serverless. (I dont want to maintain a server for this example. Additionally, later we can use AWS Lambda for testing.)
+For this project, PostgreSQL/MySQL is a good choice, But I made it in SQLite3 because it is a relational database and serverless. (I dont want to maintain a server for this example. Additionally, later we can use AWS Lambda for testing.)
 
 Create employee SQLite database
 ```SQL
@@ -162,6 +179,62 @@ Solution/Approach:
 ```
     - Create a API endpoint to fetch the responses from the database as a JSON.
     - Create a API endpoint to send the SMS to the customer. (I used Twilio for this)
+```
+
+we will use the above employee database and send the details of the employee as SMS to the employee's phone number.
+
+After inserting the employee, we get:
+```json
+{
+    "message": "success",
+    "data": {
+        "full_name": "Jane",
+        "age": "21",
+        "salary": "32000",
+        "savings": "10000",
+        "email": "Jane@gmail.com",
+        "phone": "1782361231"
+    },
+    "id": 1
+}
+```
+
+We will send the SMS to the employee's phone number using the Twilio API and to make it failsafe, we will use a message queue to store the SMS and then process them asynchronously.
+
+```js
+// API endpoint to push the SMS to the message queue
+app.post("/sms", (req, res) => {
+
+    const  { phone } = req.body;
+
+    const message = `Hi ${full_name}, welcome to the club!`;
+
+    queue.push({ message, phone });
+    res.json({ message: "success" });
+});
+
+// Helper function to send the SMS with Twilio
+const sendSMS = (message, phone) => {
+    client.messages
+        .create({
+            body: message,
+            from: "+12058500000",
+            to: phone,
+        })
+        .then((message) => console.log(message.sid));
+};
+
+// Process the SMS in the queue, once the queue is empty, it will wait for 5 seconds and then check again.
+const processSMS = () => {
+    if (queue.length > 0) {
+        const { message, phone } = queue.shift();
+        var error = sendSMS(message, phone);
+        if (error) {
+            queue.push({ message, phone });
+        }
+    }
+    setTimeout(processSMS, 5000);
+};
 ```
 
 # Additional requirements

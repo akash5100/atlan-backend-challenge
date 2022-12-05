@@ -1,10 +1,10 @@
 /*
-    CRUD operations for employee table
+    All operations for employee table
 */
 
 import express from "express";
 import db from "../database.js";
-import { validateData } from "../utils.js";
+import { validateData, addMessageToQueue } from "../utils.js";
 
 const router = express.Router();
 
@@ -26,6 +26,9 @@ router.post("/add", (req, res) => {
             res.status(400).json({ error: err.message });
             return;
         }
+        // Add entry to message queue
+        addMessageToQueue(full_name, phone);
+
         res.json({
             message: "success",
             data: req.query,
@@ -98,6 +101,25 @@ router.delete("/delete/:id", (req, res) => {
             return;
         }
         res.json({ message: "deleted", changes: this.changes });
+    });
+});
+
+// Download CSV file of all data in the employee table
+router.get("/export", (_req, res) => {
+    const sql = `SELECT * FROM employee`;
+    const params = [];
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        const header = "id,full_name,age,salary,savings,email,phone";
+        var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
+        csv = header + "\n" + csv;
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=employee.csv");
+        res.send(csv);
     });
 });
 

@@ -25,7 +25,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
                 phone TEXT NOT NULL UNIQUE,
                 CONSTRAINT age_check CHECK (age > 18),
                 CONSTRAINT salary_check CHECK (salary > 10000),
-                CONSTRAINT savings_check CHECK (savings > salary)
+                CONSTRAINT savings_check CHECK (savings < salary)
               )`),
                 (err) => {
                     if (err) {
@@ -33,6 +33,20 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
                         throw err;
                     } else {
                         console.log("User table created.");
+                    }
+                };
+            // Create a table for the message queue
+            db.run(`CREATE TABLE IF NOT EXISTS sms (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                message TEXT NOT NULL,
+                phone TEXT NOT NULL
+                )`),
+                (err) => {
+                    if (err) {
+                        console.error(err.message);
+                        throw err;
+                    } else {
+                        console.log("SMS table created.");
                     }
                 };
         });

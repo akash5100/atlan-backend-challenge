@@ -1,6 +1,5 @@
 import express from "express";
 import employeeRouter from "./routes/employee.js";
-import exportRouter from "./routes/export.js";
 
 const app = express();
 
@@ -14,8 +13,11 @@ app.get("/", (req, res) => {
 // use the employee router
 app.use("/employee", employeeRouter);
 
-// use the export router
-app.use("/export", exportRouter);
+// Run after 5 seconds, the message queue
+setTimeout(() => {
+    console.log("Message queue running...");
+    // Twilio code here
+}, 5000);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
