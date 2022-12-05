@@ -36,9 +36,9 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
                     }
                 };
             // Create a table for the message queue
-            db.run(`CREATE TABLE IF NOT EXISTS sms (
+            db.run(`CREATE TABLE IF NOT EXISTS queue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                message TEXT NOT NULL,
+                name TEXT NOT NULL,
                 phone TEXT NOT NULL
                 )`),
                 (err) => {
@@ -46,7 +46,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
                         console.error(err.message);
                         throw err;
                     } else {
-                        console.log("SMS table created.");
+                        console.log("Queue table created.");
                     }
                 };
         });
