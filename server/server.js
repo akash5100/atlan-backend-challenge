@@ -2,12 +2,13 @@ import express from "express";
 import { PORT } from "./constants.js";
 import employeeRouter from "./routes/employee.js";
 import { fillQueue, sendSMS, removeMessageFromQueue } from "./utils.js";
+import path from "path";
 
 const app = express();
 
-// display routes in the root
 app.get("/", (req, res) => {
-    res.send("Hello World");
+    var __dirname = path.resolve();
+    res.sendFile("./index.html", { root: __dirname });
 });
 
 // use the employee router

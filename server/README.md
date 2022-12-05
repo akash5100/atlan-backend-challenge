@@ -18,7 +18,8 @@
 
 1. Full Text Search
 
-<!-- Clients wanted to search for slangs (in local language) for an answer to a text question on the basis of cities (which was the answer to a different MCQ question)
+One of our clients wanted to search for slangs (in local language) for an answer to a text question on the basis of cities (which was the answer to a different MCQ question)
+
 ```
 Solution/Approach:
     - Implement Full Text Search (FTS) with Redis.
@@ -30,24 +31,33 @@ Solution/Approach:
     - Use the FTS to search for the cities.
 ```
 
-Example:
+We will create a database with two tables: `slang` and `city`.
 
-Table: cities
+```SQL
+CREATE TABLE IF NOT EXISTS slang (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    city_id INTEGER NOT NULL,
+    slang TEXT NOT NULL,
+    FOREIGN KEY (city_id) REFERENCES city (id)
+);
+```
 
-| city_id | city_name |
-|---------|-----------|
-| 1       | Delhi     |
-| 2       | Nagpur    |
-| 3       | Raipur    |
+```SQL
+CREATE TABLE IF NOT EXISTS city (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    city TEXT NOT NULL
+);
+```
+
+Now, we will insert some data into the tables.
+
+```SQL
+INSERT INTO city (city) VALUES ('Delhi');
+INSERT INTO city (city) VALUES ('Mumbai');
+INSERT INTO city (city) VALUES ('Kolkata');
+INSERT INTO city (city) VALUES ('Chennai');
 
 
-Table: slangs
-
-| slang_id | slang_name | city_id |
-|----------|------------|---------|
-| 1        | Dilli      | 1       |
-| 2        | pasand     | 2       |
-| 3        | bhat       | 3       | -->
 
 
 2. Data Validation

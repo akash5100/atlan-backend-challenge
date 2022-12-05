@@ -1,4 +1,4 @@
 global.messageQueue = [];
-const PORT = 3000;
+const PORT = 5000;
 
 export { PORT };

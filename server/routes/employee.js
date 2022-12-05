@@ -123,4 +123,40 @@ router.get("/export", (_req, res) => {
     });
 });
 
+// Get the raw csv data of employee table
+router.get("/csv", (_req, res) => {
+    const sql = `SELECT * FROM employee`;
+    const params = [];
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        const header = "id,full_name,age,salary,savings,email,phone";
+        var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
+        csv = header + "\n" + csv;
+
+        return res.status(200).json({ csv });
+    });
+});
+
+// Get the raw csv data of queue table
+router.get("/queuecsv", (_req, res) => {
+    const sql = `SELECT * FROM queue`;
+    const params = [];
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        const header = "id,full_name,phone";
+        var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
+        csv = header + "\n" + csv;
+
+        return res.status(200).json({ csv });
+    });
+});
+
 export default router;
