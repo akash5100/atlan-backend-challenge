@@ -73,7 +73,7 @@ router.get("/get/:id", (req, res) => {
 
 // Update an employee
 router.patch("/update/:id", (req, res) => {
-    const { full_name, age, salary, savings, email, phone } = req.body;
+    const { full_name, age, salary, savings, email, phone } = req.query;
     const sql = `UPDATE employee SET full_name = ?, age = ?, salary = ?, savings = ?, email = ?, phone = ? WHERE id = ?`;
     const params = [full_name, age, salary, savings, email, phone, req.params.id];
 

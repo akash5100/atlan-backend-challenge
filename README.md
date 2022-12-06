@@ -13,3 +13,5 @@ To visualize the data, run the client.
 
 1. `npm install`
 2. `npm run dev`
+
+# [Proposal](PROPOSAL.md)

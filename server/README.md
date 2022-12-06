@@ -14,328 +14,61 @@
 5. `/employee/delete/:id` - Delete employee by id from the database.
 6. `/employee/export` - Export all employees from the database as CSV.
 
-# What we want to achieve
 
-1. Full Text Search
+# Example of each endpoint
 
-One of our clients wanted to search for slangs (in local language) for an answer to a text question on the basis of cities (which was the answer to a different MCQ question)
+1. Add employee to the database.
 
-```
-Solution/Approach:
-    - Implement Full Text Search (FTS) with Redis.
-    (Note: Why redis?
-        - Redis is a key-value store, which is in-memory. So, it is faster than a database.
-        - Redis is a NoSQL database, which is more flexible than a SQL database.
-        - Redis is a single-threaded database, which is more efficient than a multi-threaded database.)
-    - Use the FTS to search for the slangs in the local language.
-    - Use the FTS to search for the cities.
-```
+    POST http://localhost:5000/employee/add
 
-We will create a database with two tables: `slang` and `city`.
-
-```SQL
-CREATE TABLE IF NOT EXISTS slang (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    city_id INTEGER NOT NULL,
-    slang TEXT NOT NULL,
-    FOREIGN KEY (city_id) REFERENCES city (id)
-);
-```
-
-```SQL
-CREATE TABLE IF NOT EXISTS city (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    city TEXT NOT NULL
-);
-```
-
-Now, we will insert some data into the tables.
-
-```SQL
-INSERT INTO city (city) VALUES ('Delhi');
-INSERT INTO city (city) VALUES ('Mumbai');
-INSERT INTO city (city) VALUES ('Kolkata');
-INSERT INTO city (city) VALUES ('Chennai');
-
-
-
-
-2. Data Validation
-
-A market research agency wanted to validate responses coming in against a set of business rules (eg. monthly savings cannot be more than monthly income) and send the response back to the data collector to fix it when the rules generate a flag.
-
-Solution/Approach:
-```md
-    - Create a relational database with the rules. (To reduce the overhead of maintaining the rules in the code.)
-    - Util function to validate incoming data against the business rules.
-```
-
-For this project, PostgreSQL/MySQL is a good choice, But I made it in SQLite3 because it is a relational database and serverless. (I dont want to maintain a server for this example. Additionally, later we can use AWS Lambda for testing.)
-
-Create employee SQLite database
-```SQL
-CREATE TABLE employee (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    age INTEGER NOT NULL,
-    salary INTEGER NOT NULL,
-    savings INTEGER NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    phone TEXT NOT NULL UNIQUE,
-);
-```
-
-This will create a table like:
-| id | name | age | salary | savings | email | phone |
-|----|------|-----|--------|---------|-------|-------|
-| 1  | John | 25  | 50000  | 10000   | john@gmail.com | 1234567890 |
-| 2  | Jane | 30  | 100000 | 50000   | jane@gmail.com | 1234567891 |
-
-
-Validation example:
-- Employee age cannot be less than 18.
-- Employee salary cannot be less than 10000.
-- Employee savings cannot be more than salary.
-- Employee email cannot be duplicate and must be valid.
-- Employee phone number cannot be duplicate and must be 10 digits.
-
-These all will be checked by CONSTRAINT's in the database.
-
-```SQL
-CREATE TABLE IF NOT EXISTS employee (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name TEXT NOT NULL,
-    age INTEGER NOT NULL,
-    salary INTEGER NOT NULL,
-    savings INTEGER NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    phone TEXT NOT NULL UNIQUE,
-    CONSTRAINT age_check CHECK (age > 18),
-    CONSTRAINT salary_check CHECK (salary > 10000),
-    CONSTRAINT savings_check CHECK (savings > salary)
-);
-```
-
-3. Data export
-
-A very common need for organizations is wanting all their data onto Google Sheets, wherein they could connect their CRM, and also generate graphs and charts offered by Sheets out of the box. In such cases, each response to the form becomes a row in the sheet, and questions in the form become columns. 
-
-
-Solution/Approach:
-```md
-    - Create a API endpoint to fetch the responses from the database as a JSON.
-    - Create a util function to convert the JSON to CSV.
-```
-
-For this example, we will use the above employee database.
-
-`json` response from the endpoint be like:
-```JSON
-[
+    Request body:
     {
-        "id": 1,
-        "name": "John",
-        "age": 25,
-        "salary": 50000,
-        "savings": 10000,
-        "email": "john@gmail.com",
-        "phone": "1234567890",
-    },
-    {
-        "id": 2,
-        "name": "Jane",
-        "age": 30,
-        "salary": 100000,
-        "savings": 50000,
-        "email": "Jane@gmail.com",
-        "phone": "1234567890",
+        "full_name": "John",
+        "email": "John@gmail.com"
+        "phone": 1234567890,
+        "age": 22,
+        "salary": 32000,
+        "savings": 10000
     }
-]
-```
 
-```js
-// API endpoint to export data as CSV
-app.get("/", (_req, res) => {
-    const sql = `SELECT * FROM employee`;
-    const params = [];
+    - Make one on the running server: http://localhost:5000/employee/add?full_name=Jacob&age=22&salary=32000&savings=10000&email=Jacob@gmail.com&phone=9926211966
 
-    db.all(sql, params, (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
+2. Get all employees from the database.
+    
+        GET http://localhost:5000/employee/get
+    
+        - Make one on the running server: http://localhost:5000/employee/get
+
+3. Get employee by id from the database.
+
+        GET http://localhost:5000/employee/get/:id
+    
+        - Make one on the running server: http://localhost:5000/employee/get/1
+
+4. Update employee by id in the database.
+
+        PUT http://localhost:5000/employee/update/:id
+    
+        Request body:
+        {
+            "full_name": "John",
+            "email": "Johnny@gmail.com",
+            "phone": 1234567890,
+            "age": 22,
+            "salary": 32000,
+            "savings": 10000,
         }
-        const header = "id,full_name,age,salary,savings,email,phone";
-        var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
-        csv = header + "\n" + csv;
-        res.setHeader("Content-Type", "text/csv");
-        res.setHeader("Content-Disposition", "attachment; filename=employee.csv");
-        res.send(csv);
-    });
-});
-```
 
-Output: 
-```csv
-id,full_name,age,salary,savings,email,phone
-1,Akash,19,30000,10000,akash@gmail.com,9876543210
-2,Akash,19,30000,10000,akash1@gmail.com,9876543211
-3,Jane,21,32000,10000,Jane@gmail.com,1782361231
-```
+        - Make one on the running server: http://localhost:5000/employee/update/1?full_name=Jane&age=21&salary=32000&savings=10000&email=Jane@gmail.com&phone=1782361231
 
-4. A recent client partner wanted us to send an SMS to the customer whose details are collected in the response as soon as the ingestion was complete reliably. The content of the SMS consists of details of the customer, which were a part of the answers in the response. This customer was supposed to use this as a “receipt” for them having participated in the exercise.
+5. Delete employee by id from the database.
+    
+            DELETE http://localhost:5000/employee/delete/:id
+        
+            - Make one on the running server: http://localhost:5000/employee/delete/1
 
-Solution/Approach:
-```
-    - Create a API endpoint to fetch the responses from the database as a JSON.
-    - Create a API endpoint to send the SMS to the customer. (I used Twilio for this)
-```
+6. Export all employees from the database as CSV.
 
-we will use the above employee database and send the details of the employee as SMS to the employee's phone number.
-
-After inserting the employee, we get:
-```json
-{
-    "message": "success",
-    "data": {
-        "full_name": "Jane",
-        "age": "21",
-        "salary": "32000",
-        "savings": "10000",
-        "email": "Jane@gmail.com",
-        "phone": "1782361231"
-    },
-    "id": 1
-}
-```
-
-We will send the SMS to the employee's phone number using the Twilio API and to make it failsafe, we will use a message queue to store the SMS and then process them asynchronously.
-
-```js
-/*
-- When we add an employee, we add name, phone number to a table called queue.
-- The nodejs server will convert the table to a queue and then process the queue asynchronously.
-- The queue will be processed every 5 seconds.
-- If the SMS is sent successfully, it will be removed from the queue.
-- If the SMS is not sent successfully, it will retry after 5 seconds.
-*/
-
-// Helper function to send the SMS with Twilio
-const sendSMS = (message, phone) => {
-    // Dummy from documentaion
-    client.messages
-        .create({
-            body: message,
-            from: "+12058500000",
-            to: phone,
-        })
-        .then((message) => console.log(message.sid));
-};
-
-// Process the SMS in the queue, once the queue is empty, it will wait for 5 seconds and then check again.
-const processSMS = () => {
-    // Fill the messageQueue with data from the database
-    fillQueue();
-    // Process the message queue
-    if (messageQueue.length > 0) {
-        const { name, phone } = messageQueue.shift();
-        var error = sendSMS(name, phone);
-        if (error) {
-            messageQueue.push({ name, phone });
-        } else {
-            removeMessageFromQueue(name, phone); // Remove the message from the queue table
-        }
-    }
-    setTimeout(processSMS, 5000);
-};
-
-const fillQueue = () => {
-    // Fill the global queue with the data from the database
-    // Format: {name, phone}
-    const sql = `SELECT name, phone FROM queue`;
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            throw err;
-        }
-        rows.forEach((row) => {
-            messageQueue.push(row);
-        });
-    });
-};
-
-const removeMessageFromQueue = (name, phone) => {
-    const sql = `DELETE FROM queue WHERE name = ? AND phone = ?`;
-    const params = [name, phone];
-
-    db.run(sql, params, function (err, _result) {
-        if (err) {
-            console.log(err.message);
-        }
-    });
-};
-
-// Did we just implement a message queue? Yes, we did.
-```
-
-# Additional requirements
-Design a sample schematic for how you would store forms (with questions) and responses (with answers) in the Collect data store. Forms, Questions, Responses and Answers each will have relevant metadata.
-```
-    - We use a relational database to store the forms, questions, responses and answers.
-```
-
-Eventual consistency is what the clients expect as an outcome of this feature, making sure no responses get missed in the journey. Do keep in mind that this solution must be failsafe, should eventually recover from circumstances like power/internet/service outages, and should scale to cases like millions of responses across hundreds of forms for an organization.
-```
-    - We use a message queue to store the responses and then process them asynchronously.
-    (We can use a message queue like RabbitMQ or Kafka or we can implement one with Redis, but due to time constraints, I used a simple queue in nodejs with npm package called message-queue)
-```
-
-Design a sample schematic for how you would store forms (with questions) and responses (with answers) in the Collect data store. Forms, Questions, Responses and Answers each will have relevant metadata
-
-Tables:
-- form
-- question
-- response
-- answer
-
-```SQL
-CREATE TABLE form (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
-);
-```
-
-```SQL
-CREATE TABLE question (
-    id INTEGER PRIMARY KEY,
-    form_id INTEGER NOT NULL,
-    question TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (form_id) REFERENCES form (id)
-);
-```
-
-```SQL
-CREATE TABLE response (
-    id INTEGER PRIMARY KEY,
-    form_id INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (form_id) REFERENCES form (id)
-);
-```
-
-```SQL
-CREATE TABLE answer (
-    id INTEGER PRIMARY KEY,
-    response_id INTEGER NOT NULL,
-    question_id INTEGER NOT NULL,
-    answer TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (response_id) REFERENCES response (id),
-    FOREIGN KEY (question_id) REFERENCES question (id)
-);
-```
+        GET http://localhost:5000/employee/export
+    
+        - Make one on the running server: http://localhost:5000/employee/export

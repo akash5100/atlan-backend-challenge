@@ -1,0 +1,163 @@
+{
+	"info": {
+		"_postman_id": "242e5f67-bddf-44c5-984b-3544d157ce25",
+		"name": "backend-challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17606939"
+	},
+	"item": [
+		{
+			"name": "Get json of all users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/employee/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"employee",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CSV export",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/employee/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"employee",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/employee/add?full_name=Jeremy&age=32&salary=32000&savings=10000&email=Jeremy@gmail.com&phone=1782261231",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"employee",
+						"add"
+					],
+					"query": [
+						{
+							"key": "full_name",
+							"value": "Jeremy"
+						},
+						{
+							"key": "age",
+							"value": "32"
+						},
+						{
+							"key": "salary",
+							"value": "32000"
+						},
+						{
+							"key": "savings",
+							"value": "10000"
+						},
+						{
+							"key": "email",
+							"value": "Jeremy@gmail.com"
+						},
+						{
+							"key": "phone",
+							"value": "1782261231"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user with id",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/employee/add?full_name=Jane&age=21&salary=32000&savings=10000&email=Jane@gmail.com&phone=1782361231",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"employee",
+						"add"
+					],
+					"query": [
+						{
+							"key": "full_name",
+							"value": "Jane"
+						},
+						{
+							"key": "age",
+							"value": "21"
+						},
+						{
+							"key": "salary",
+							"value": "32000"
+						},
+						{
+							"key": "savings",
+							"value": "10000"
+						},
+						{
+							"key": "email",
+							"value": "Jane@gmail.com"
+						},
+						{
+							"key": "phone",
+							"value": "1782361231"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete user with id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/employee/delete/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"employee",
+						"delete",
+						"5"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

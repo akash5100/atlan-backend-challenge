@@ -37,9 +37,14 @@ const index = () => {
 
     return (
         <>
-            <h1>Index of</h1>
+            <p>
+                <a href="https://akashverma.vercel.app/">Made by Akash Verma</a>
+            </p>
+            <h1>Index of /</h1>
+            <hr></hr>
             <h2> employee table</h2>
             <div className="table" dangerouslySetInnerHTML={{ __html: csv_to_table(data) }} />
+            <hr></hr>
             <h2> message queue table</h2>
             <p> When you add new employee, keep hitting refresh button to see the table update</p>
             <div className="table" dangerouslySetInnerHTML={{ __html: csv_to_table(data2) }} />
