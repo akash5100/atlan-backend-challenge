@@ -46,9 +46,7 @@ CREATE TABLE form (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
-```
 
-```SQL
 CREATE TABLE question (
     id INTEGER PRIMARY KEY,
     form_id INTEGER NOT NULL,
@@ -57,9 +55,7 @@ CREATE TABLE question (
     updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (form_id) REFERENCES form (id)
 );
-```
 
-```SQL
 CREATE TABLE response (
     id INTEGER PRIMARY KEY,
     form_id INTEGER NOT NULL,
@@ -67,9 +63,7 @@ CREATE TABLE response (
     updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (form_id) REFERENCES form (id)
 );
-```
 
-```SQL
 CREATE TABLE answer (
     id INTEGER PRIMARY KEY,
     response_id INTEGER NOT NULL,
@@ -208,6 +202,7 @@ Validation example:
 These all will be checked by CONSTRAINT's in the database.
 
 ```SQL
+-- Not Final
 CREATE TABLE IF NOT EXISTS employee (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     full_name TEXT NOT NULL,
@@ -419,3 +414,7 @@ To set up alerts for a system, you can use a notification service or platform su
 - Created a plugin to send SMS to the employee's phone number when an employee is added.
 - Discussed the additional requirements such as logging, monitoring, alerting, and benchmarking.
 - Look into the pros and cons of using SQLite as a database.
+
+## Existing issues
+
+- Message send print 2 times in the console.

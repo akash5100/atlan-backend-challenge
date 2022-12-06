@@ -1,7 +1,7 @@
 import express from "express";
 import { PORT } from "./constants.js";
 import employeeRouter from "./routes/employee.js";
-import { fillQueue, sendSMS, removeMessageFromQueue } from "./utils.js";
+import { fillQueue, sendSMS, removeMessageFromQueue, isNull } from "./utils.js";
 import path from "path";
 
 const app = express();
@@ -30,7 +30,7 @@ const processSMS = () => {
     setTimeout(processSMS, 5000);
 };
 
-// Run the processSMS function every 5 seconds
+// This function will be called every 5 seconds
 processSMS();
 
 // start the server

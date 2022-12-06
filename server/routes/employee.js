@@ -1,6 +1,4 @@
-/*
-    All operations for employee table
-*/
+/*  All operations for employee table  */
 
 import express from "express";
 import db from "../database.js";
@@ -114,7 +112,7 @@ router.get("/export", (_req, res) => {
             res.status(400).json({ error: err.message });
             return;
         }
-        const header = "id,full_name,age,salary,savings,email,phone";
+        const header = "id,full_name,age,salary,savings,email,phone,form_id";
         var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
         csv = header + "\n" + csv;
         res.setHeader("Content-Type", "text/csv");
@@ -133,7 +131,7 @@ router.get("/csv", (_req, res) => {
             res.status(400).json({ error: err.message });
             return;
         }
-        const header = "id,full_name,age,salary,savings,email,phone";
+        const header = "id,full_name,age,salary,savings,email,phone,form_id";
         var csv = rows.map((row) => Object.values(row).join(",")).join("\n");
         csv = header + "\n" + csv;
 

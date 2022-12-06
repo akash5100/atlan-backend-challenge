@@ -26,8 +26,9 @@ const fillQueue = () => {
     const sql = `SELECT name, phone FROM queue`;
     db.all(sql, [], (err, rows) => {
         if (err) {
-            throw err;
+            console.log(err.message);
         }
+        if (rows === undefined) return;
         rows.forEach((row) => {
             messageQueue.push(row);
         });
@@ -63,5 +64,15 @@ const sendSMS = (name, phone) => {
     console.log(`Sending SMS to ${name} at ${phone}`);
 };
 
-export { validateData, addMessageToQueue, sendSMS, fillQueue, removeMessageFromQueue };
+const isNull = (table) => {
+    const sql = `SELECT COUNT(*) FROM ${table}`;
+    db.get(sql, [], (err, row) => {
+        if (err) console.log(err.message);
+        if (row === undefined) return true;
+        if (row["COUNT(*)"] === 0) return true;
+        return false;
+    });
+};
+
+export { validateData, addMessageToQueue, sendSMS, fillQueue, removeMessageFromQueue, isNull };
 export default validateData;
