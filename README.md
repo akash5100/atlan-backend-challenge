@@ -3,7 +3,7 @@
 `cd server`
 
 1. `npm install`
-2. `node server.js`
+2. `npm start`
 
 # Run client
 
