@@ -11,7 +11,7 @@ const Err = (err, name) => {
     if (err) {
         console.error(err.message);
         throw err;
-    } else console.log(`${name} table created.`);
+    } else console.log(`connected to ${name} table.`);
 };
 // Employee table schema
 const db = new sqlite3.Database(DBSOURCE, (err) => {

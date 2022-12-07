@@ -13,7 +13,11 @@
 4. `/employee/update/:id` - Update employee by id in the database.
 5. `/employee/delete/:id` - Delete employee by id from the database.
 6. `/employee/export` - Export all employees from the database as CSV.
-
+7. `/form/create` - Create a form.
+8. `/form/get` - Get all forms.
+9. `/form/get/:id` - Get form by id.
+10. `/form/delete/:id` - Delete form by id.
+11. `/form/export` - Export all forms as CSV.
 
 # Example of each endpoint
 

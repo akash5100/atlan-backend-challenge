@@ -1,6 +1,10 @@
 import express from "express";
 import { PORT } from "./constants.js";
 import employeeRouter from "./routes/employee.js";
+import formRouter from "./routes/form.js";
+import questionRouter from "./routes/question.js";
+import responseRouter from "./routes/response.js";
+import answerRouter from "./routes/answer.js";
 import { fillQueue, sendSMS, removeMessageFromQueue, isNull } from "./utils.js";
 import path from "path";
 
@@ -13,6 +17,18 @@ app.get("/", (req, res) => {
 
 // use the employee router
 app.use("/employee", employeeRouter);
+
+// use the form router
+app.use("/form", formRouter);
+
+// use the question router
+app.use("/question", questionRouter);
+
+// use the response router
+app.use("/response", responseRouter);
+
+// use the answer router
+app.use("/answer", answerRouter);
 
 const processSMS = () => {
     // Fill the messageQueue with data from the database
@@ -27,11 +43,10 @@ const processSMS = () => {
             removeMessageFromQueue(name, phone);
         }
     }
-    setTimeout(processSMS, 5000);
 };
 
-// This function will be called every 5 seconds
-processSMS();
+//TODO: Make this enable and disable, based on user preference
+setInterval(processSMS, 5000);
 
 // start the server
 app.listen(PORT, () => {

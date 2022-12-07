@@ -5,25 +5,24 @@
 const formSchema = `CREATE TABLE IF NOT EXISTS form (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
     description TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    FOREIGN KEY (user_id) REFERENCES employee (id)
     )`;
 
 const questionSchema = `CREATE TABLE IF NOT EXISTS question (
     id INTEGER PRIMARY KEY,
     form_id INTEGER NOT NULL,
-        question TEXT NOT NULL,
-        created_at TIMESTAMP NOT NULL,
-        updated_at TIMESTAMP NOT NULL,
-        FOREIGN KEY (form_id) REFERENCES form (id)
+    question TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (form_id) REFERENCES form (id)
     )`;
 
 const responseSchema = `CREATE TABLE IF NOT EXISTS response (
     id INTEGER PRIMARY KEY,
     form_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (form_id) REFERENCES form (id)
     )`;
 
@@ -33,7 +32,6 @@ const answerSchema = `CREATE TABLE IF NOT EXISTS answer (
     question_id INTEGER NOT NULL,
     answer TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (response_id) REFERENCES response (id),
     FOREIGN KEY (question_id) REFERENCES question (id)
     )`;
