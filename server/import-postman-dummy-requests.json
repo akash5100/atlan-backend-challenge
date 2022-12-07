@@ -247,7 +247,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/response/create?form_id=9&created_at=2022-12-07 06:37:35",
+							"raw": "http://localhost:5000/response/create?form_id=1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -260,11 +260,7 @@
 							"query": [
 								{
 									"key": "form_id",
-									"value": "9"
-								},
-								{
-									"key": "created_at",
-									"value": "2022-12-07 06:37:35"
+									"value": "1"
 								}
 							]
 						}
@@ -311,6 +307,60 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Search slang",
+			"item": [
+				{
+					"name": "search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/search?slang=lit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"search"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "Chicago",
+									"disabled": true
+								},
+								{
+									"key": "slang",
+									"value": "lit"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Fill the slangs and cities table with dummy data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/fill",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"fill"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

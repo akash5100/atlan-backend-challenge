@@ -64,6 +64,10 @@ const sendSMS = (name, phone) => {
     console.log(`Sending SMS to ${name} at ${phone}`);
 };
 
+/**
+ * Return true if the table is empty
+ * @param {String} table
+ */
 const isNull = (table) => {
     const sql = `SELECT COUNT(*) FROM ${table}`;
     db.get(sql, [], (err, row) => {
