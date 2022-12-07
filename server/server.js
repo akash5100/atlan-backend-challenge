@@ -6,6 +6,7 @@ import questionRouter from "./routes/question.js";
 import responseRouter from "./routes/response.js";
 import answerRouter from "./routes/answer.js";
 import fillRouter from "./routes/fill.js";
+import searchRouter from "./routes/search.js";
 import { fillQueue, sendSMS, removeMessageFromQueue, isNull } from "./utils.js";
 import path from "path";
 
@@ -33,6 +34,9 @@ app.use("/answer", answerRouter);
 
 // use the fill router
 app.use("/fill", fillRouter);
+
+// use the search router
+app.use("/search", searchRouter);
 
 const processSMS = () => {
     // Fill the messageQueue with data from the database
