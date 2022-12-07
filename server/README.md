@@ -18,6 +18,16 @@
 9. `/form/get/:id` - Get form by id.
 10. `/form/delete/:id` - Delete form by id.
 11. `/form/export` - Export all forms as CSV.
+12. `/question/create` - Create a question.
+13. `/answer/create` - Create an answer.
+14. `/answer/read` - Read all answers.
+15. `/answer/read/:id` - Read answer by id.
+16. `/fill` - Fill slang and cities table with dummy data.
+17. `/search` - Search for slangs.
+18. `/response/create` - Create a response.
+19. `/question/create` - Create a question.
+
+* maybe I missed some endpoints, but I think I got them all.
 
 # Example of each endpoint
 
