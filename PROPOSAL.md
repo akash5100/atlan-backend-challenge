@@ -12,19 +12,16 @@ Tables:
     - name
     - description
     - created_at
-    - updated_at
 - question
     - id
     - form_id
     - question
     - created_at
-    - updated_at
     - foreign key (form_id) references form (id)
 - response
     - id
     - form_id
     - created_at
-    - updated_at
     - foreign key (form_id) references form (id)
 - answer
     - id
@@ -32,7 +29,6 @@ Tables:
     - question_id
     - answer
     - created_at
-    - updated_at
     - foreign key (response_id) references response (id)
     - foreign key (question_id) references question (id)
 
@@ -44,7 +40,6 @@ CREATE TABLE form (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE question (
@@ -52,7 +47,6 @@ CREATE TABLE question (
     form_id INTEGER NOT NULL,
     question TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (form_id) REFERENCES form (id)
 );
 
@@ -60,7 +54,6 @@ CREATE TABLE response (
     id INTEGER PRIMARY KEY,
     form_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (form_id) REFERENCES form (id)
 );
 
@@ -70,11 +63,16 @@ CREATE TABLE answer (
     question_id INTEGER NOT NULL,
     answer TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
     FOREIGN KEY (response_id) REFERENCES response (id),
     FOREIGN KEY (question_id) REFERENCES question (id)
 );
 ```
+
+Hierarchy:
+- [ ] First, you would insert data into the form table, specifying the id, name, description, and created_at values for the form.
+- [ ] Next, you would insert data into the question table, specifying the id, form_id, question, and created_at values for the question. The form_id value should be the id of the form that the question belongs to.
+- [ ] After that, you would insert data into the response table, specifying the id, form_id, and created_at values for the response. The form_id value should be the id of the form that the response belongs to.
+- [ ] Finally, you would insert data into the answer table, specifying the id, response_id, question_id, answer, and created_at values for the answer. The response_id and question_id values should be the id values of the response and question that the answer belongs to, respectively.
 
 Responses and answers can be stored in a separate table or collection in the database, with each response having its own record. The response record can contain metadata such as the form's name, response date, and the respondent's name, as well as a list of answers that are associated with the response. Each answer record can contain the question text and the respondent's answer to that question.
 
@@ -418,3 +416,4 @@ To set up alerts for a system, you can use a notification service or platform su
 ## Existing issues
 
 - Message send print 2 times in the console.
+- Creating form for non existing user_id crashes the server.
